@@ -1,2 +1,3 @@
-# fm-updater
+# fw-updater
+
 Firmware updater over SPI
