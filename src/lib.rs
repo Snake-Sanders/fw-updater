@@ -1,5 +1,9 @@
-pub fn run() {
-    let _updater = Updater::new();
+pub mod spi_slave;
+
+pub use spi_slave::SpiSlave;
+
+pub fn run(spi: SpiSlave) {
+    let _updater = Updater::new(spi);
     // wait to receive the configuration: number of blocks, address, size, etc.
 
     // loop to receive the blocks and store them directly in flash
@@ -13,35 +17,36 @@ pub fn run() {
 }
 
 // #[derive(Debug, PartialEq)]
-struct Updater{
-   state: State,
+struct Updater {
+    spi: SpiSlave,
+    state: State,
 }
 
 impl Updater {
-    pub fn new() -> Updater {
-        Updater{
-            state: State::Init
+    pub fn new(spi: SpiSlave) -> Self {
+        Updater {
+            spi: SpiSlave {},
+            state: State::Init,
         }
     }
 }
 
 #[derive(Debug, PartialEq)]
-pub enum State{
-    Init, // waits for the configuration setup
-    Setup, // configured and ready for update
-    Updating, // processing incomming data
+pub enum State {
+    Init,      // waits for the configuration setup
+    Setup,     // configured and ready for update
+    Updating,  // processing incomming data
     Validated, // tx completed, data validated waiting to configm update
-    Completed // mark update pending  and restart
+    Completed, // mark update pending  and restart
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn new_updater_starts_with_initialization_state(){
-        let updater = Updater::new();
-        assert_eq!(updater.state , State::Init) ;
+    fn new_updater_starts_with_initialization_state() {
+        let updater = Updater::new(SpiSlave{});
+        assert_eq!(updater.state, State::Init);
     }
 }
