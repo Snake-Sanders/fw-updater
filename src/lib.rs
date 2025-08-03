@@ -1,8 +1,10 @@
 pub mod mock_spi_slave;
 pub mod spi_slave;
+pub mod types;
 
 pub use mock_spi_slave::MockSpiSlave;
 pub use spi_slave::{Command, SpiError, SpiFrame, SpiSlave, BUS_SIZE};
+pub use types::*;
 
 pub fn run<T: SpiSlave>(spi: &mut T) {
     let mut updater = Updater::new(spi);
@@ -70,15 +72,6 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub enum State {
-    Init,      // waits for the configuration setup
-    Setup,     // configured and ready for update
-    Updating,  // processing incomming data
-    Validated, // tx completed, data validated waiting to configm update
-    Completed, // mark update pending  and restart
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -95,7 +88,7 @@ mod tests {
         let mut spi = MockSpiSlave::new();
 
         let mut data = [0u8; BUS_SIZE];
-        data[0] = Command::Config as u8; 
+        data[0] = Command::Config as u8;
         data[1] = 0xFA;
         spi.set_bus_data(&data);
 
