@@ -16,7 +16,12 @@ tests.
 incoming data to flash might take too long and miss the next incoming frame.
 - User standarized error types for SPI instead of a general one.
 
+## Run
+
+- Build with `cargo build`
+- Run tests with `cargo test`
+
 ## References
 
 <https://docs.rs/embedded-hal/latest/embedded_hal/spi/trait.SpiBus.html>
-https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
+<https://doc.rust-lang.org/book/ch15-05-interior-mutability.html>
