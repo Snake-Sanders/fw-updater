@@ -1,6 +1,8 @@
 pub mod spi_slave;
+pub mod mock_spi_slave;
 
-pub use spi_slave::{MockSpiSlave, SpiSlave};
+pub use spi_slave:: SpiSlave;
+pub use mock_spi_slave::MockSpiSlave;
 
 pub fn run<T: SpiSlave>(spi: &T) {
     let _updater = Updater::new(spi);
