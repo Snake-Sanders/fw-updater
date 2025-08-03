@@ -138,7 +138,9 @@ mod tests {
         let result = updater.block_read_setup();
         assert!(result.is_ok());
 
-        let config = updater.config.clone();
-        assert_eq!(config.addr, 0x78563412);
+        let Config { addr, block_num, crc } = updater.config;
+        assert_eq!(addr, 0x78563412);
+        assert_eq!(block_num, 22);
+        assert_eq!(crc, 33);
     }
 }
