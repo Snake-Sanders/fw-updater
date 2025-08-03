@@ -8,8 +8,18 @@ pub enum SpiError {
     BusError,
 }
 
-const BUS_SIZE: usize = 16;
+#[derive(Debug, PartialEq)]
+pub enum Command {
+    Config = 0x01,
+    Write = 0x02,
+    Read = 0x03,
+    Confirm = 0x04,
+}
 
-pub type SpiFrame = [u8; BUS_SIZE];
+pub const BUS_SIZE: usize = 16;
 
+#[derive(Debug, Clone, Copy)]
+pub struct SpiFrame {
+    pub cmd: u8,
+    pub data: [u8; BUS_SIZE - 1], // 15 bytes (16 - 1 for cmd)
 }

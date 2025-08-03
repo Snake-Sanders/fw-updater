@@ -1,7 +1,5 @@
-use crate::spi_slave::{SpiError, SpiSlave};
+use crate::spi_slave::{SpiError, SpiSlave, BUS_SIZE};
 use std::cell::RefCell;
-
-const BUS_SIZE: usize = 16;
 
 pub struct MockSpiSlave {
     bus: RefCell<[u8; BUS_SIZE]>,
