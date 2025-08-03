@@ -18,6 +18,7 @@ incoming data to flash might take too long and miss the next incoming frame.
 - Add error handling for clear error logs and reporting.
 - User standarized error types for SPI instead of a general one.
 - Consider that the SPI might be also used to access the Flash.
+- use constant to reference fields in buffers instead of indices.
 
 ## Run
 
