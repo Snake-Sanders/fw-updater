@@ -15,6 +15,11 @@ tests.
 - Integrate function calls to the Bootloader.
 - Make sure the size of the spi frame is not too big, otherwise writing the
 incoming data to flash might take too long and miss the next incoming frame.
+- ensure memory alignment for the data in the SPI frame, maybe the size should
+match the memory pages sizes.
+- The function to write to memory provided by the bootloader assumes fix
+address, and it is not required to be send via SPI, although it is more
+convenient.
 - Add error handling for clear error logs and reporting.
 - User standarized error types for SPI instead of a general one.
 - Consider that the SPI might be also used to access the Flash.
