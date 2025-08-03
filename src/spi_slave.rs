@@ -1,4 +1,5 @@
 pub use crate::Command;
+
 pub trait SpiSlave {
     // reads from SPI bus into buf
     fn read(&mut self, buf: &mut [u8]) -> Result<(), SpiError>;
@@ -17,6 +18,7 @@ pub struct SpiFrame {
     pub cmd: u8,
     pub data: [u8; BUS_SIZE - 1], // 15 bytes (16 - 1 for cmd)
 }
+
 impl SpiFrame {
     pub fn get_command(&self) -> Command {
         match self.cmd {
@@ -27,6 +29,7 @@ impl SpiFrame {
             _ => Command::Invalid,
         }
     }
+
     pub fn get_address(&self) -> u32 {
         self.decode_u32(0)
     }
