@@ -1,8 +1,8 @@
-pub mod spi_slave;
 pub mod mock_spi_slave;
+pub mod spi_slave;
 
-pub use spi_slave:: SpiSlave;
 pub use mock_spi_slave::MockSpiSlave;
+pub use spi_slave::SpiSlave;
 
 pub fn run<T: SpiSlave>(spi: &T) {
     let _updater = Updater::new(spi);
@@ -48,19 +48,21 @@ mod tests {
 
     #[test]
     fn new_updater_starts_with_initialization_state() {
-        let spi = MockSpiSlave::new();
-        let updater = Updater::new(&spi);
-
+        let mut spi = MockSpiSlave::new();
+        let updater = Updater::new(&mut spi);
         assert_eq!(updater.state, State::Init);
     }
 
     #[test]
     fn updater_reads_data_from_spi() {
+        const BUS_SIZE: usize = 16;
         let mut spi = MockSpiSlave::new();
         let updater = Updater::new(&spi);
 
-        let data = [0x00, 0xFA];
-        spi.write(&data);
+        let mut data = [0u8; BUS_SIZE];
+        data[0] = 0x00;
+        data[1] = 0xFA;
+        spi.set_bus_data(&data);
         assert_eq!(updater.state, State::Setup)
     }
 

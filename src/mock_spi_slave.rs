@@ -1,11 +1,16 @@
-use crate::spi_slave::{SpiSlave, SpiError};
+use crate::spi_slave::{SpiError, SpiSlave};
+use std::cell::RefCell;
+
+const BUS_SIZE: usize = 16;
 
 pub struct MockSpiSlave {
-    bus: [u8; 256],
+    bus: RefCell<[u8; BUS_SIZE]>,
 }
 impl Default for MockSpiSlave {
     fn default() -> Self {
-        MockSpiSlave { bus: [0u8; 256] }
+        MockSpiSlave {
+            bus: RefCell::new([0; BUS_SIZE]),
+        }
     }
 }
 
@@ -13,18 +18,22 @@ impl MockSpiSlave {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn set_bus_data(&self, data: &[u8; BUS_SIZE]) {
+        self.bus.borrow_mut().copy_from_slice(data);
+    }
 }
 
 impl SpiSlave for MockSpiSlave {
     fn read(&mut self, buf: &mut [u8]) -> Result<(), SpiError> {
-        for (i, &byte) in self.bus.iter().enumerate() {
+        for (i, &byte) in self.bus.borrow().iter().enumerate() {
             buf[i] = byte;
         }
         Ok(())
     }
     fn write(&mut self, buf: &[u8]) -> Result<(), SpiError> {
         for (i, &byte) in buf.iter().enumerate() {
-            self.bus[i] = byte;
+            self.bus.borrow_mut()[i] = byte;
         }
 
         Ok(())
