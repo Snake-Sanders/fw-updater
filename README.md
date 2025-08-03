@@ -9,3 +9,7 @@ Firmware updater over SPI
 tests.
 3. write the happy path first.
 4. consider pending features and write down TODOS.
+
+## References
+
+https://docs.rs/embedded-hal/latest/embedded_hal/spi/trait.SpiBus.html
