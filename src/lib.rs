@@ -6,35 +6,16 @@ pub use mock_spi_slave::MockSpiSlave;
 pub use spi_slave::{Command, SpiError, SpiFrame, SpiSlave, BUS_SIZE};
 pub use types::*;
 
-pub struct FwUpdater<T: SpiSlave> {
-    spi: T,
-}
-
-impl<T: SpiSlave> FwUpdater<T> {
-    pub fn new(spi: T) -> Self {
-        FwUpdater { spi }
-    }
-
-    pub fn run(&mut self) {
-        let mut updater = Updater::new(&mut self.spi);
-
-        let _ = updater.block_read_setup();
-        let _ = updater.block_read_data();
-        let _ = updater.validate_received_data();
-        let _ = updater.block_read_confirmation();
-    }
-}
-
-// Keep the free function for backward compatibility
 pub fn run<T: SpiSlave>(spi: &mut T) {
-    let mut fw = FwUpdater::new(spi);
-    fw.run();
+    let mut updater = Updater::new(spi);
+    updater.run();
 }
 
 #[derive(Debug, PartialEq)]
 struct Updater<'a, T: SpiSlave> {
     spi: &'a mut T,
     state: State,
+    config: Config,
 }
 
 impl<'a, T: SpiSlave> Updater<'a, T> {
@@ -42,10 +23,18 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         Updater {
             spi,
             state: State::Init,
+            config: Config::new(),
         }
     }
 
-    pub fn block_read_setup(&mut self) -> Result<(), SpiError> {
+    pub fn run(&mut self) {
+        let _ = self.block_read_setup();
+        let _ = self.block_read_data();
+        let _ = self.validate_received_data();
+        let _ = self.block_read_confirmation();
+    }
+
+    fn block_read_setup(&mut self) -> Result<(), SpiError> {
         // wait to receive the configuration: number of blocks, address, size, etc.
         let frame = self.read_bus()?;
 
@@ -58,16 +47,16 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         }
     }
 
-    pub fn block_read_data(&mut self) -> Result<(), SpiError> {
+    fn block_read_data(&mut self) -> Result<(), SpiError> {
         // call `write_update` with each recieve data
         todo!("loop to receive the blocks and store them directly in flash");
     }
 
-    pub fn validate_received_data(&mut self) -> Result<(), SpiError> {
+    fn validate_received_data(&mut self) -> Result<(), SpiError> {
         //
         todo!("when blocks transmission finish check the CRC of the full file");
     }
-    pub fn block_read_confirmation(&mut self) -> Result<(), SpiError> {
+    fn block_read_confirmation(&mut self) -> Result<(), SpiError> {
         todo!("expect a confirmation to mark update pending and reset");
         // this way, several memory areas can be written before restarting.
 
