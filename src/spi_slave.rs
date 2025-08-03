@@ -26,12 +26,7 @@ pub struct SpiFrame {
 }
 impl SpiFrame {
     pub fn get_address(&self) -> u32 {
-        let mut addr = 0;
-        addr |= self.data[0] as u32;
-        addr |= (self.data[1] as u32) << 8;
-        addr |= (self.data[2] as u32) << 16;
-        addr |= (self.data[3] as u32) << 24;
-        addr
+        self.decode_u32(0)
     }
 
     pub fn get_block_num(&self) -> u8 {
