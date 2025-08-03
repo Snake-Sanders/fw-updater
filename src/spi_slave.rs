@@ -33,4 +33,19 @@ impl SpiFrame {
         addr |= (self.data[3] as u32) << 24;
         addr
     }
+
+    pub fn get_block_num(&self) -> u8 {
+        self.data[4]
+    }
+    pub fn get_crc(&self) -> u32 {
+        self.decode_u32(5)
+    }
+    fn decode_u32(&self, i: usize) -> u32 {
+        let mut n = 0;
+        n |= self.data[i] as u32;
+        n |= (self.data[i + 1] as u32) << 8;
+        n |= (self.data[i + 2] as u32) << 16;
+        n |= (self.data[i + 3] as u32) << 24;
+        n
+    }
 }

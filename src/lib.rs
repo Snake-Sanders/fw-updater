@@ -41,11 +41,10 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         match frame.cmd {
             x if x == Command::Config as u8 => {
                 self.state = State::Setup;
-                let addr = frame.get_address();
                 self.config = Config {
-                    addr: addr,
-                    block_num: 0,
-                    crc: 0,
+                    addr: frame.get_address(),
+                    block_num: frame.get_block_num(),
+                    crc: frame.get_crc(),
                 };
 
                 Ok(())
@@ -124,7 +123,7 @@ mod tests {
         data[3] = 0x56;
         data[4] = 0x78;
         // num blocks
-        data[5] = 0x03;
+        data[5] = 0x04;
         // crc
         data[6] = 0x11;
         data[7] = 0x22;
@@ -138,9 +137,13 @@ mod tests {
         let result = updater.block_read_setup();
         assert!(result.is_ok());
 
-        let Config { addr, block_num, crc } = updater.config;
+        let Config {
+            addr,
+            block_num,
+            crc,
+        } = updater.config;
         assert_eq!(addr, 0x78563412);
-        assert_eq!(block_num, 22);
-        assert_eq!(crc, 33);
+        assert_eq!(block_num, 4);
+        assert_eq!(crc, 0x44332211);
     }
 }
