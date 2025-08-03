@@ -8,20 +8,14 @@ const BUS_SIZE: usize = 16;
 
 pub fn run<T: SpiSlave>(spi: &mut T) {
     let mut updater = Updater::new(spi);
-    // wait to receive the configuration: number of blocks, address, size, etc.
 
-    let _ = updater.wait_for_setup();
-    // loop to receive the blocks and store them directly in flash
-
-    // maybe send ACK the block was stored OK or Error
-
-    // when blocks transmission finish check the CRC of the full file
-
-    // expect a confirmation to mark update pending and reset
-    // this way, several memory areas can be written before restarting.
+    let _ = updater.block_read_setup();
+    let _ = updater.block_read_data();
+    let _ = updater.validate_received_data();
+    let _ = updater.block_read_confirmation();
 }
 
-// #[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 struct Updater<'a, T: SpiSlave> {
     spi: &'a mut T,
     state: State,
@@ -34,10 +28,30 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
             state: State::Init,
         }
     }
-    pub fn wait_for_setup(&mut self) -> Result<(), SpiError> {
-        let _frame = self.read_bus()?;
+
+    pub fn block_read_setup(&mut self) -> Result<(), SpiError> {
+        // wait to receive the configuration: number of blocks, address, size, etc.
+        let frame = self.read_bus()?;
+
         self.state = State::Setup;
         Ok(())
+    }
+
+    pub fn block_read_data(&mut self) -> Result<(), SpiError> {
+        // call `write_update` with each recieve data
+        todo!("loop to receive the blocks and store them directly in flash");
+    }
+
+    pub fn validate_received_data(&mut self) -> Result<(), SpiError> {
+        //
+        todo!("when blocks transmission finish check the CRC of the full file");
+    }
+    pub fn block_read_confirmation(&mut self) -> Result<(), SpiError> {
+        todo!("expect a confirmation to mark update pending and reset");
+        // this way, several memory areas can be written before restarting.
+
+        // call mark_update_pending()
+        // call system_reset()
     }
 
     fn read_bus(&mut self) -> Result<SpiFrame, SpiError> {
@@ -54,6 +68,14 @@ pub enum State {
     Updating,  // processing incomming data
     Validated, // tx completed, data validated waiting to configm update
     Completed, // mark update pending  and restart
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Commands {
+    Config = 0x01,
+    Write = 0x02,
+    Read = 0x03,
+    Confirm = 0x04,
 }
 
 #[cfg(test)]
@@ -78,7 +100,7 @@ mod tests {
 
         let mut updater = Updater::new(&mut spi);
 
-        let result = updater.wait_for_setup();
+        let result = updater.block_read_setup();
         assert!(result.is_ok());
         assert_eq!(updater.state, State::Setup);
     }
