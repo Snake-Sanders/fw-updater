@@ -4,6 +4,7 @@ use std::cell::RefCell;
 pub struct MockSpiSlave {
     bus: RefCell<[u8; BUS_SIZE]>,
 }
+
 impl Default for MockSpiSlave {
     fn default() -> Self {
         MockSpiSlave {
@@ -29,6 +30,7 @@ impl SpiSlave for MockSpiSlave {
         }
         Ok(())
     }
+
     fn write(&mut self, buf: &[u8]) -> Result<(), SpiError> {
         for (i, &byte) in buf.iter().enumerate() {
             self.bus.borrow_mut()[i] = byte;

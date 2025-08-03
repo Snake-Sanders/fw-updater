@@ -62,6 +62,7 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         //
         todo!("when blocks transmission finish check the CRC of the full file");
     }
+
     fn block_read_confirmation(&mut self) -> Result<(), SpiError> {
         todo!("expect a confirmation to mark update pending and reset");
         // this way, several memory areas can be written before restarting.
