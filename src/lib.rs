@@ -52,30 +52,55 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
 
     /// "loop to receive the blocks and store them directly in flash"
     fn block_read_data(&mut self) -> Result<(), SpiError> {
-        (1..self.config.block_num).for_each(|i| {
-            let frame = self.read_bus()?;
-
-            match frame.get_command() {
-                Command::Write => dbg(),
-                // TODO: call `write_update` with each recieve data
-                _invalid => Err(SpiError::BusError),
+        for i in 1..=self.config.block_num {
+            match self.read_bus() {
+                Ok(frame) => match frame.get_command() {
+                    Command::Write => {
+                        self.state = State::Updating;
+                        let offset = self.calculate_offset(i);
+                        self.write_update(&frame.data, offset);
+                    }
+                    _invalid => return Err(SpiError::BusError),
+                },
+                Err(e) => return Err(e),
             }
-        });
+        }
 
         Ok(())
     }
 
     fn validate_received_data(&mut self) -> Result<(), SpiError> {
-        //
+        self.validate_flash_crc();
         todo!("when blocks transmission finish check the CRC of the full file");
     }
 
     fn block_read_confirmation(&mut self) -> Result<(), SpiError> {
-        todo!("expect a confirmation to mark update pending and reset");
         // this way, several memory areas can be written before restarting.
+        self.mark_update_pending();
+        self.system_reset();
+        todo!("expect a confirmation to mark update pending and reset");
+    }
 
-        // call mark_update_pending()
-        // call system_reset()
+    fn write_update(&self, _data: &[u8], offset: u32) {
+        // TODO: call Bootloader write_update
+        // use usize for offset
+        dbg!("writing DFU offset: {}", offset);
+    }
+
+    fn system_reset(&self) {
+        // TODO: call Bootloader system_reset()
+    }
+
+    fn mark_update_pending(&self) {
+        // TODO: call Bootloader mark_update_pending()
+    }
+
+    fn calculate_offset(&self, index: u8) -> u32 {
+        self.config.addr + index as u32
+    }
+    fn validate_flash_crc(&self) -> bool {
+        // todo: the address and image size is in the config
+        true
     }
 
     fn read_bus(&mut self) -> Result<SpiFrame, SpiError> {
