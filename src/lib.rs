@@ -3,7 +3,7 @@ pub mod spi_slave;
 pub mod types;
 
 pub use mock_spi_slave::MockSpiSlave;
-pub use spi_slave::{SpiError, SpiFrame, SpiSlave, BUS_SIZE};
+pub use spi_slave::{SpiError, SpiFrame, SpiSlave, BUS_SIZE, FRAME_DATA_SIZE};
 pub use types::*;
 
 pub fn run<T: SpiSlave>(spi: &mut T) {
@@ -27,6 +27,7 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         }
     }
 
+    /// main entry point to fash the sw update
     pub fn run(&mut self) {
         let _ = self.block_read_setup();
         let _ = self.block_read_data();
@@ -105,8 +106,10 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
     }
 
     fn calculate_offset(&self, index: u8) -> u32 {
-        self.config.addr + index as u32
+        // memory address target offset
+        self.config.addr + ((index as u32) * FRAME_DATA_SIZE as u32)
     }
+
     fn validate_flash_crc(&self) -> bool {
         // todo: the address and image size is in the config
         true

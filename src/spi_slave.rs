@@ -11,7 +11,10 @@ pub enum SpiError {
     BusError,
 }
 
+/// size of spi frame in bytes
 pub const BUS_SIZE: usize = 16;
+/// size of the payload for data (write) frames
+pub const FRAME_DATA_SIZE: usize = BUS_SIZE - 1;
 
 #[derive(Debug, Clone, Copy)]
 pub struct SpiFrame {
