@@ -187,4 +187,32 @@ mod tests {
         assert_eq!(block_num, 4);
         assert_eq!(crc, 0x44332211);
     }
+
+    #[test]
+    fn updater_loops_reading_data_to_flash() {
+        let mut spi = MockSpiSlave::new();
+
+        let mut data = [0u8; BUS_SIZE];
+        data[0] = Command::Write as u8;
+        // blocks to write
+        data[1] = 0x12;
+        data[2] = 0x34;
+        data[3] = 0x56;
+        data[4] = 0x78;
+        data[5] = 0x04;
+        data[6] = 0x11;
+        data[7] = 0x22;
+        data[8] = 0x33;
+        data[9] = 0x44;
+
+        spi.set_bus_data(&data);
+
+        let mut updater = Updater::new(&mut spi);
+        updater.state = State::Setup;
+        updater.config.block_num = 9;
+
+        let result = updater.block_read_data();
+        assert!(result.is_ok());
+        assert_eq!(updater.state, State::Updating);
+    }
 }
