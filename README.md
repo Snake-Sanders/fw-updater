@@ -47,5 +47,5 @@ run(&mut spi_slave);
 
 ## References
 
-<https://docs.rs/embedded-hal/latest/embedded_hal/spi/trait.SpiBus.html>
-<https://doc.rust-lang.org/book/ch15-05-interior-mutability.html>
+- <https://docs.rs/embedded-hal/latest/embedded_hal/spi/trait.SpiBus.html>
+- <https://doc.rust-lang.org/book/ch15-05-interior-mutability.html>
