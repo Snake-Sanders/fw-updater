@@ -14,7 +14,7 @@ impl<T: SpiSlave> FwUpdater<T> {
     pub fn new(spi: T) -> Self {
         FwUpdater { spi }
     }
-    
+
     pub fn run(&mut self) {
         let mut updater = Updater::new(&mut self.spi);
 
