@@ -2,9 +2,7 @@ pub mod mock_spi_slave;
 pub mod spi_slave;
 
 pub use mock_spi_slave::MockSpiSlave;
-pub use spi_slave::{SpiError, SpiFrame, SpiSlave};
-
-const BUS_SIZE: usize = 16;
+pub use spi_slave::{Command, SpiError, SpiFrame, SpiSlave, BUS_SIZE};
 
 pub fn run<T: SpiSlave>(spi: &mut T) {
     let mut updater = Updater::new(spi);
@@ -33,8 +31,13 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         // wait to receive the configuration: number of blocks, address, size, etc.
         let frame = self.read_bus()?;
 
-        self.state = State::Setup;
-        Ok(())
+        match frame.cmd {
+            x if x == Command::Config as u8 => {
+                self.state = State::Setup;
+                Ok(())
+            }
+            _invalid => Err(SpiError::BusError),
+        }
     }
 
     pub fn block_read_data(&mut self) -> Result<(), SpiError> {
@@ -55,8 +58,14 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
     }
 
     fn read_bus(&mut self) -> Result<SpiFrame, SpiError> {
-        let mut frame = [0u8; BUS_SIZE];
-        self.spi.read(&mut frame)?;
+        let mut buf = [0u8; BUS_SIZE];
+        self.spi.read(&mut buf)?;
+
+        let frame = SpiFrame {
+            cmd: buf[0],
+            data: buf[1..].try_into().unwrap(),
+        };
+
         Ok(frame)
     }
 }
@@ -68,14 +77,6 @@ pub enum State {
     Updating,  // processing incomming data
     Validated, // tx completed, data validated waiting to configm update
     Completed, // mark update pending  and restart
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Commands {
-    Config = 0x01,
-    Write = 0x02,
-    Read = 0x03,
-    Confirm = 0x04,
 }
 
 #[cfg(test)]
@@ -94,7 +95,7 @@ mod tests {
         let mut spi = MockSpiSlave::new();
 
         let mut data = [0u8; BUS_SIZE];
-        data[0] = 0x00;
+        data[0] = Command::Config as u8; 
         data[1] = 0xFA;
         spi.set_bus_data(&data);
 
