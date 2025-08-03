@@ -41,6 +41,13 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         match frame.cmd {
             x if x == Command::Config as u8 => {
                 self.state = State::Setup;
+                let addr = frame.get_address();
+                self.config = Config {
+                    addr: addr,
+                    block_num: 0,
+                    crc: 0,
+                };
+
                 Ok(())
             }
             _invalid => Err(SpiError::BusError),
@@ -105,6 +112,33 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "not yet implemented"]
-    fn updater_is_configured_via_spi_slave() {}
+    // #[ignore = "not yet implemented"]
+    fn updater_is_configured_via_spi_slave() {
+        let mut spi = MockSpiSlave::new();
+
+        let mut data = [0u8; BUS_SIZE];
+        data[0] = Command::Config as u8;
+        // address
+        data[1] = 0x12;
+        data[2] = 0x34;
+        data[3] = 0x56;
+        data[4] = 0x78;
+        // num blocks
+        data[5] = 0x03;
+        // crc
+        data[6] = 0x11;
+        data[7] = 0x22;
+        data[8] = 0x33;
+        data[9] = 0x44;
+
+        spi.set_bus_data(&data);
+
+        let mut updater = Updater::new(&mut spi);
+
+        let result = updater.block_read_setup();
+        assert!(result.is_ok());
+
+        let config = updater.config.clone();
+        assert_eq!(config.addr, 0x78563412);
+    }
 }

@@ -24,3 +24,13 @@ pub struct SpiFrame {
     pub cmd: u8,
     pub data: [u8; BUS_SIZE - 1], // 15 bytes (16 - 1 for cmd)
 }
+impl SpiFrame {
+    pub fn get_address(&self) -> u32 {
+        let mut addr = 0;
+        addr |= self.data[0] as u32;
+        addr |= (self.data[1] as u32) << 8;
+        addr |= (self.data[2] as u32) << 16;
+        addr |= (self.data[3] as u32) << 24;
+        addr
+    }
+}

@@ -7,7 +7,7 @@ pub enum State {
     Completed, // mark update pending  and restart
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Config {
     pub addr: u32,     // 32 bits address
     pub block_num: u8, // number of blocks, 256 - control fields
