@@ -10,6 +10,12 @@ tests.
 3. write the happy path first.
 4. consider pending features and write down TODOS.
 
+## TODOS
+
+- Make sure the size of the spi frame is not too big, otherwise writing the
+incoming data to flash might take too long and miss the next incoming frame.
+- User standarized error types for SPI instead of a general one.
+
 ## References
 
-https://docs.rs/embedded-hal/latest/embedded_hal/spi/trait.SpiBus.html
+<https://docs.rs/embedded-hal/latest/embedded_hal/spi/trait.SpiBus.html>
