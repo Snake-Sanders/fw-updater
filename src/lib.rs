@@ -6,13 +6,29 @@ pub use mock_spi_slave::MockSpiSlave;
 pub use spi_slave::{Command, SpiError, SpiFrame, SpiSlave, BUS_SIZE};
 pub use types::*;
 
-pub fn run<T: SpiSlave>(spi: &mut T) {
-    let mut updater = Updater::new(spi);
+pub struct FwUpdater<T: SpiSlave> {
+    spi: T,
+}
 
-    let _ = updater.block_read_setup();
-    let _ = updater.block_read_data();
-    let _ = updater.validate_received_data();
-    let _ = updater.block_read_confirmation();
+impl<T: SpiSlave> FwUpdater<T> {
+    pub fn new(spi: T) -> Self {
+        FwUpdater { spi }
+    }
+    
+    pub fn run(&mut self) {
+        let mut updater = Updater::new(&mut self.spi);
+
+        let _ = updater.block_read_setup();
+        let _ = updater.block_read_data();
+        let _ = updater.validate_received_data();
+        let _ = updater.block_read_confirmation();
+    }
+}
+
+// Keep the free function for backward compatibility
+pub fn run<T: SpiSlave>(spi: &mut T) {
+    let mut fw = FwUpdater::new(spi);
+    fw.run();
 }
 
 #[derive(Debug, PartialEq)]
