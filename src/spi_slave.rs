@@ -4,6 +4,7 @@ pub trait SpiSlave {
     // writes buf in SPI bus
     fn write(&mut self, buf: &[u8]) -> Result<(), SpiError>;
 }
+
 pub enum SpiError {
     BusError,
 }
