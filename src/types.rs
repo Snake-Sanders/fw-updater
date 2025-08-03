@@ -9,10 +9,9 @@ pub enum State {
 
 #[derive(Debug, PartialEq)]
 pub enum Command {
-    Init = 0x00,
     Config = 0x01,
     Write = 0x02,
-    Read = 0x03,
+    Read = 0x03, // reserved
     Confirm = 0x04,
     Invalid = 0xFF,
 }

@@ -21,8 +21,8 @@ impl SpiFrame {
     pub fn get_command(&self) -> Command {
         match self.cmd {
             0x01 => Command::Config,
-            0x02 => Command::Write,
-            0x03 => Command::Read,
+            0x02 => Command::Write, 
+            0x03 => Command::Read, // reserved
             0x04 => Command::Confirm,
             _ => Command::Invalid,
         }
