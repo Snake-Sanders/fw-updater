@@ -1,4 +1,4 @@
-pub use types::Command;
+pub use crate::Command;
 pub trait SpiSlave {
     // reads from SPI bus into buf
     fn read(&mut self, buf: &mut [u8]) -> Result<(), SpiError>;

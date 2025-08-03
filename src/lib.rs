@@ -3,7 +3,7 @@ pub mod spi_slave;
 pub mod types;
 
 pub use mock_spi_slave::MockSpiSlave;
-pub use spi_slave::{Command, SpiError, SpiFrame, SpiSlave, BUS_SIZE};
+pub use spi_slave::{SpiError, SpiFrame, SpiSlave, BUS_SIZE};
 pub use types::*;
 
 pub fn run<T: SpiSlave>(spi: &mut T) {
@@ -34,28 +34,35 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         let _ = self.block_read_confirmation();
     }
 
+    /// wait to receive the configuration: number of blocks, address, size, etc.
     fn block_read_setup(&mut self) -> Result<(), SpiError> {
-        // wait to receive the configuration: number of blocks, address, size, etc.
-        let frame = self.read_bus()?;
-
-        match frame.cmd {
-            x if x == Command::Config as u8 => {
+        self.read_bus().and_then(|frame| match frame.get_command() {
+            Command::Config => {
                 self.state = State::Setup;
                 self.config = Config {
                     addr: frame.get_address(),
                     block_num: frame.get_block_num(),
                     crc: frame.get_crc(),
                 };
-
                 Ok(())
             }
             _invalid => Err(SpiError::BusError),
-        }
+        })
     }
 
+    /// "loop to receive the blocks and store them directly in flash"
     fn block_read_data(&mut self) -> Result<(), SpiError> {
-        // call `write_update` with each recieve data
-        todo!("loop to receive the blocks and store them directly in flash");
+        (1..self.config.block_num).for_each(|i| {
+            let frame = self.read_bus()?;
+
+            match frame.get_command() {
+                Command::Write => dbg(),
+                // TODO: call `write_update` with each recieve data
+                _invalid => Err(SpiError::BusError),
+            }
+        });
+
+        Ok(())
     }
 
     fn validate_received_data(&mut self) -> Result<(), SpiError> {
