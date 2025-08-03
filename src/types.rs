@@ -7,6 +7,16 @@ pub enum State {
     Completed, // mark update pending  and restart
 }
 
+#[derive(Debug, PartialEq)]
+pub enum Command {
+    Init = 0x00,
+    Config = 0x01,
+    Write = 0x02,
+    Read = 0x03,
+    Confirm = 0x04,
+    Invalid = 0xFF,
+}
+
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Config {
     pub addr: u32,     // 32 bits address
