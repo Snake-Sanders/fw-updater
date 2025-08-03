@@ -2,7 +2,7 @@ pub mod spi_slave;
 
 pub use spi_slave::{MockSpiSlave, SpiSlave};
 
-pub fn run<T: SpiSlave>(spi: T) {
+pub fn run<T: SpiSlave>(spi: &T) {
     let _updater = Updater::new(spi);
     // wait to receive the configuration: number of blocks, address, size, etc.
 
@@ -17,13 +17,13 @@ pub fn run<T: SpiSlave>(spi: T) {
 }
 
 // #[derive(Debug, PartialEq)]
-struct Updater<T: SpiSlave> {
-    spi: T,
+struct Updater<'a, T: SpiSlave> {
+    spi: &'a T,
     state: State,
 }
 
-impl<T: SpiSlave> Updater<T> {
-    pub fn new(spi: T) -> Self {
+impl<'a, T: SpiSlave> Updater<'a, T> {
+    pub fn new(spi: &'a T) -> Self {
         Updater {
             spi,
             state: State::Init,
@@ -47,7 +47,21 @@ mod tests {
     #[test]
     fn new_updater_starts_with_initialization_state() {
         let spi = MockSpiSlave::new();
-        let updater = Updater::new(spi);
+        let updater = Updater::new(&spi);
+
         assert_eq!(updater.state, State::Init);
     }
+
+    #[test]
+    fn updater_reads_data_from_spi() {
+        let mut spi = MockSpiSlave::new();
+        let updater = Updater::new(&spi);
+
+        let data = [0x00, 0xFA];
+        spi.write(&data);
+        assert_eq!(updater.state, State::Setup)
+    }
+
+    #[test]
+    fn updater_is_configured_via_spi_slave() {}
 }
