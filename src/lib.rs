@@ -74,11 +74,20 @@ impl<'a, T: SpiSlave> Updater<'a, T> {
         todo!("when blocks transmission finish check the CRC of the full file");
     }
 
+    /// expect a confirmation to mark update pending and reset
     fn block_read_confirmation(&mut self) -> Result<(), SpiError> {
-        // this way, several memory areas can be written before restarting.
-        self.mark_update_pending();
-        self.system_reset();
-        todo!("expect a confirmation to mark update pending and reset");
+        match self.read_bus() {
+            Ok(frame) => match frame.get_command() {
+                Command::Confirm => {
+                    self.mark_update_pending();
+                    self.system_reset();
+                    Ok(())
+                }
+
+                _invalid => Err(SpiError::BusError),
+            },
+            _ => Err(SpiError::BusError),
+        }
     }
 
     fn write_update(&self, _data: &[u8], offset: u32) {
@@ -144,7 +153,6 @@ mod tests {
     }
 
     #[test]
-    // #[ignore = "not yet implemented"]
     fn updater_is_configured_via_spi_slave() {
         let mut spi = MockSpiSlave::new();
 
