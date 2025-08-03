@@ -27,6 +27,8 @@ incoming data to flash might take too long and miss the next incoming frame.
 ## Example
 
 ```rust
+use fw_updater::{run, SpiSlave, SpiError};
+
 let mut spi_config = spi::Config::default();
 // configure HW specific SPI driver as slave
 // set parameters to spi_config...frequency, phase, polarity...
@@ -34,10 +36,10 @@ let mut spi_config = spi::Config::default();
 // probably the SPI is also used to access the flash therefore it has to be
 // shared.
 let spi = Spi::new_blocking(p.SPI1, clk, mosi, miso, spi_config.clone());
-let mut spi_slave = // create instance implementing SpiSlave trait
+// create instance implementing SpiSlave trait
 
-flet mut fw = FwUpdater::new(&mut spi_slave);
-fw.run();
+let mut spi_slave = MySpiSlave::new(&mut spi);
+run(&mut spi_slave);
 ```
 
 ## References
