@@ -12,6 +12,7 @@ tests.
 
 ## TODOS
 
+- Integrate function calls to the Bootloader.
 - Make sure the size of the spi frame is not too big, otherwise writing the
 incoming data to flash might take too long and miss the next incoming frame.
 - Add error handling for clear error logs and reporting.
